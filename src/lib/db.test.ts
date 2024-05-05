@@ -14,7 +14,7 @@ describe('test DbService', () => {
 		let feed: Feed = {
 			id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
 			url: 'https://cleantechnica.com/feed/',
-			items: []
+			articles: []
 		};
 		await db.insertFeed(feed);
 
@@ -28,14 +28,14 @@ describe('test DbService', () => {
 		let feed: Feed = {
 			id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
 			url: 'https://cleantechnica.com/feed/',
-			items: []
+			articles: []
 		};
 		await db.insertFeed(feed);
 
 		let feed2: Feed = {
 			id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6e',
 			url: 'https://techcrunch.com/feed',
-			items: []
+			articles: []
 		};
 		await db.insertFeed(feed2);
 

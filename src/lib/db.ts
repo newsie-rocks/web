@@ -45,6 +45,15 @@ export class DbService {
 					let store = db.createObjectStore('feeds', { keyPath: 'id' });
 					store.createIndex('url', 'url', { unique: true });
 				}
+				if (!db.objectStoreNames.contains('articles')) {
+					let store = db.createObjectStore('articles', { keyPath: 'id' });
+				}
+				if (!db.objectStoreNames.contains('folders')) {
+					let store = db.createObjectStore('folders', { keyPath: 'id' });
+				}
+				if (!db.objectStoreNames.contains('users')) {
+					let store = db.createObjectStore('users', { keyPath: 'id' });
+				}
 			};
 		});
 	}
@@ -103,15 +112,36 @@ export class DbService {
 			if (!this.db) {
 				throw new Error('Database not initialized');
 			}
+
 			let trx = this.db.transaction('feeds', 'readwrite');
 			let store = trx.objectStore('feeds');
-
 			let request = store.delete(id);
 			request.onsuccess = () => {
 				resolve();
 			};
 			request.onerror = () => {
 				reject(new Error('Error removing feed'));
+			};
+		});
+	}
+
+	/**
+	 * Removes all feeds
+	 */
+	async removeFeeds(): Promise<void> {
+		return new Promise((resolve, reject) => {
+			if (!this.db) {
+				throw new Error('Database not initialized');
+			}
+
+			let trx = this.db.transaction('feeds', 'readwrite');
+			let store = trx.objectStore('feeds');
+			let request = store.clear();
+			request.onsuccess = () => {
+				resolve();
+			};
+			request.onerror = () => {
+				reject(new Error('Error removing feeds'));
 			};
 		});
 	}

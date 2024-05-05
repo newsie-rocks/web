@@ -22,13 +22,14 @@ export interface Feed {
 		url: string;
 		title?: string;
 	};
-	items: FeedItem[];
+	articles: Article[];
 }
 
 /**
- * A feed item
+ * A feed article
  */
-export interface FeedItem {
+export interface Article {
+	id: string;
 	link?: string;
 	guid?: string;
 	title?: string;
@@ -83,8 +84,10 @@ export class FeedService {
 						title: rawFeed.image.title
 					}
 				: undefined,
-			items: rawFeed.items.map((item) => {
+			articles: rawFeed.items.map((item) => {
+				const id = uuidv4();
 				return {
+					id,
 					link: item.link,
 					guid: item.guid,
 					title: item.title,
@@ -127,6 +130,13 @@ export class FeedService {
 	}
 
 	/**
+	 * Removes all feeds
+	 */
+	async removeFeeds(): Promise<void> {
+		await this.db.removeFeeds();
+	}
+
+	/**
 	 * Refreshes all the feeds
 	 */
 	async refreshFeeds(): Promise<void> {
@@ -164,6 +174,27 @@ export class FeedService {
 				.up();
 		}
 
-		return opml.end({ pretty: true });
+		return opml.end({ pretty: false });
+	}
+
+	/**
+	 * Import an OPML file
+	 */
+	async importFeeds(opml: string): Promise<void> {
+		todo('importFeeds');
+	}
+
+	/**
+	 * Marks an article as read
+	 */
+	async markArticleAsRead(articleId: string): Promise<void> {
+		todo('markArticleAsRead');
+	}
+
+	/**
+	 * Marks an article as unread
+	 */
+	async markArticleAsUnread(articleId: string): Promise<void> {
+		todo('markArticleAsUnread');
 	}
 }
