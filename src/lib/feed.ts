@@ -14,6 +14,7 @@ export type FeedRaw = Parser.Output<{}>;
  */
 export interface Feed {
 	id: string;
+	name?: string;
 	url: string;
 	title?: string;
 	description?: string;
@@ -22,7 +23,8 @@ export interface Feed {
 		url: string;
 		title?: string;
 	};
-	articles: Article[];
+	folderId?: string;
+	articles: string[];
 }
 
 /**
@@ -40,6 +42,14 @@ export interface Article {
 	isoDate?: string;
 	categories?: string[];
 	contentSnippet?: string;
+}
+
+/**
+ * A feed folder type
+ */
+export interface Folder {
+	id: string;
+	name?: string;
 }
 
 /**
@@ -61,7 +71,7 @@ export class FeedService {
 	private db: DbService = new DbService();
 
 	/**
-	 * Instantiate the feed service
+	 * Initializes the feed service
 	 */
 	async init(): Promise<void> {
 		await this.db.init();
@@ -69,11 +79,13 @@ export class FeedService {
 
 	/**
 	 * Fetches a feed
+	 *
+	 * NOTE: the feed ID is set to a dummy value
 	 */
-	private async fetchFeed(url: string, id: string): Promise<Feed> {
+	private async fetchFeed(url: string): Promise<Feed> {
 		let rawFeed = await fetchFeedRaw(url);
 		let feed = {
-			id: id,
+			id: '__DUMMY__',
 			url: rawFeed.feedUrl || '__',
 			title: rawFeed.title,
 			description: rawFeed.description,
@@ -107,7 +119,7 @@ export class FeedService {
 	/**
 	 * Adds a new feed to the service
 	 */
-	async addFeed(url: string): Promise<Feed> {
+	async addFeed(url: string, opts?: { name?: string; folderId?: string }): Promise<Feed> {
 		// first, we check if the feed already exists in the DB
 		let feedInDb = await this.db.getFeedByUrl(url);
 		if (feedInDb) {
@@ -115,8 +127,10 @@ export class FeedService {
 		}
 
 		// else, we fetch and insert the feed in DB
-		let id = uuidv4();
-		let feed = await this.fetchFeed(url, id);
+		let feed = await this.fetchFeed(url);
+		feed.id = uuidv4();
+		feed.name = opts?.name || undefined;
+		feed.folderId = opts?.folderId || undefined;
 
 		await this.db.insertFeed(feed);
 		return feed;
@@ -125,15 +139,15 @@ export class FeedService {
 	/**
 	 * Removes a feed by ID
 	 */
-	async removeFeed(id: string): Promise<void> {
-		await this.db.removeFeed(id);
+	async removeFeed(feedId: string): Promise<void> {
+		await this.db.deleteFeed(feedId);
 	}
 
 	/**
 	 * Removes all feeds
 	 */
-	async removeFeeds(): Promise<void> {
-		await this.db.removeFeeds();
+	async removeAllFeeds(): Promise<void> {
+		await this.db.deleteAllFeeds();
 	}
 
 	/**
@@ -143,7 +157,7 @@ export class FeedService {
 		const feeds = await this.db.getAllFeeds();
 		const refreshes = [];
 		for (const feed of feeds) {
-			const refresh = this.fetchFeed(feed.url, feed.id);
+			const refresh = this.fetchFeed(feed.url);
 			refreshes.push(refresh);
 		}
 		await Promise.all(refreshes);
