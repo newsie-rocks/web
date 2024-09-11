@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import 'fake-indexeddb/auto';
-import { FeedService, fetchFeedRaw, type Feed } from '../feed';
+import { FeedService, fetchFeedRaw, type Feed } from '../app/feed';
 
 describe('fetchRawfeed', () => {
 	it.concurrent('fetch RSS 2.0', async () => {

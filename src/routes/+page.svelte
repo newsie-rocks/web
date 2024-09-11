@@ -1,62 +1,44 @@
 <script lang="ts">
 	import { Settings, Plus } from 'lucide-svelte';
-	import Logo from '../lib/icons/Logo.svelte';
+	import { FeedService, type Feed, type Post } from '$lib/app/feed';
+	import Logo from '$lib/icons/Logo.svelte';
+	import Popup from '$lib/ui/Popup.svelte';
+	import NewFeed from '$lib/ui/NewFeed.svelte';
+	import SettingsPage from '$lib/ui/Settings.svelte';
+	import { onMount } from 'svelte';
 
-	interface Feed {
-		id: number;
-		name: string;
-		url: string;
+	let feeds: Feed[] = [];
+	let activeFeedIndex = 0;
+	$: activeFeed = feeds.length > 0 ? feeds[activeFeedIndex] : undefined;
+	let activePostIndex = 0;
+	$: activePost = (activeFeed?.posts || [])[activePostIndex];
+
+	let showAddFeedPopup = false;
+
+	function toggleAddFeedPopup() {
+		showAddFeedPopup = !showAddFeedPopup;
 	}
 
-	interface Post {
-		id: number;
-		date: Date;
-		title: string;
-		summary: string;
-		content: string | undefined;
+	let showSettingsPopup = false;
+
+	function toggleSettingsPopup() {
+		showSettingsPopup = !showSettingsPopup;
 	}
 
-	interface ActiveFeed extends Feed {
-		id: number;
-		name: string;
-		url: string;
-		posts: Post[];
-	}
+	let feedService = new FeedService();
 
-	let feeds: Feed[] = [
-		{ id: 1, name: 'Feed 1', url: 'https://example.com/feed' },
-		{ id: 2, name: 'Feed 2', url: 'https://example.com/feed' }
-	];
-
-	let activeFeed: ActiveFeed = {
-		id: 1,
-		name: 'Feed 1',
-		url: 'https://example.com/feed',
-		posts: [
-			{ id: 1, date: new Date(), title: 'Post 1', summary: 'Summary 1', content: 'Content 1' },
-			{ id: 2, date: new Date(), title: 'Post 2', summary: 'Summary 2', content: 'Content 2' }
-		]
-	};
-
-	let activePost: Post = {
-		id: 1,
-		date: new Date(),
-		title: 'Post 1',
-		summary: 'Summary 1',
-		content: 'Article 1'
-	};
-
-	function addFeed() {
-		console.log('feed added');
-	}
-
-	function openSettings() {
-		console.log('open settings');
-	}
-
-	function openFeed(id: number) {
+	function openFeed(id: string) {
 		console.log('open feed');
 	}
+
+	// Call the async initializer when the component mounts
+	onMount(async () => {
+		await feedService.init();
+		feeds = await feedService.getAllFeeds();
+		console.log(feeds);
+		console.log(feeds);
+		console.log(activePost);
+	});
 </script>
 
 <main class="main">
@@ -66,30 +48,42 @@
 				<Logo />
 			</div>
 			<div class="actions">
-				<button on:click={addFeed}>
+				<!-- Add feed -->
+				<button on:click={toggleAddFeedPopup}>
 					<Plus></Plus>
 				</button>
-				<button on:click={openSettings}>
-					<Settings></Settings>
+				<Popup show={showAddFeedPopup}>
+					<NewFeed />
+				</Popup>
+				<!-- Open settings -->
+				<button on:click={() => toggleSettingsPopup()}>
+					<Settings />
 				</button>
+				<Popup show={showSettingsPopup}>
+					<SettingsPage />
+				</Popup>
 			</div>
 		</div>
 		<div class="list">
 			{#each feeds as feed}
-				<button on:click={() => openFeed(feed.id)} class="feed">{feed.name}</button>
+				<button on:click={() => openFeed(feed.id)} class="feed">{feed.title}</button>
 			{/each}
 		</div>
 	</div>
+
+	<!-- Feed posts -->
 	<div class="col-2">
-		{#each activeFeed.posts as post}
+		{#each activeFeed?.posts || [] as post}
 			<div>
 				<h2>{post.title}</h2>
 				<p>{post.summary}</p>
 			</div>
 		{/each}
 	</div>
+
+	<!-- Post -->
 	<div class="col-3">
-		{activePost.content}
+		{activePost?.content || ''}
 	</div>
 </main>
 

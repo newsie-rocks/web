@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { DbService } from '../db';
+import { DbService } from '../app/db';
 import 'fake-indexeddb/auto';
 import { fetchFeedRaw, type Feed, type Folder } from '../feed';
 
