@@ -67,7 +67,6 @@ export class FeedService {
 	async addFeed(feedInput: { name: string; url: string }): Promise<Feed> {
 		// console.log('Feed added:', feedInput);
 		// parse feed
-		// https://longform.asmartbear.com/index.xml
 		const encodedUrl = encodeURIComponent(feedInput.url);
 		const response = await fetch(`/api/feeds?feedUrl=${encodedUrl}`);
 		const text = await response.text();
